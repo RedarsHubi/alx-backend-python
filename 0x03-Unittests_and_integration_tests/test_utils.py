@@ -3,7 +3,7 @@
 """
 import unittest
 import unittest.mock
-from utils import access_nested_map, get_json
+from utils import access_nested_map, get_json, memoize
 from parameterized import parameterized
 
 
@@ -30,7 +30,7 @@ class TestAccessNestedMap(unittest.TestCase):
 
 
 class TestGetJson(unittest.TestCase):
-    ''' Test for GETJSON'''
+    """Test for GETJSON"""
     @parameterized.expand([
         ("http://example.com", {"payload": True}),
         ("http://holberton.io", {"payload": False}),
@@ -40,6 +40,32 @@ class TestGetJson(unittest.TestCase):
         with unittest.mock.patch('utils.requests.get') as mock_get:
             mock_get.return_value.json.return_value = expected
             self.assertEqual(get_json(url), expected)
+
+
+class TestMemoize(unittest.TestCase):
+    """Test for memoize"""
+
+    class TestClass:
+        """Test for class"""
+
+        def a_method(self):
+            """Test for method"""
+            return 42
+
+        @memoize
+        def a_property(self):
+            """Test for property"""
+            return self.a_method()
+
+    def test_memoize(self):
+        """Test for memoize function"""
+        test_class = TestMemoize.TestClass()
+        with unittest.mock.patch.object(
+                TestMemoize.TestClass, 'a_method', return_value=42
+        ) as mock_method:
+            self.assertEqual(test_class.a_property, 42)
+            self.assertEqual(test_class.a_property, 42)
+            mock_method.assert_called_once()
 
 
 if __name__ == '__main__':
